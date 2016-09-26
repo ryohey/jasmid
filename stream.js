@@ -1,16 +1,16 @@
 /* Wrapper for accessing strings through sequential reads */
 function Stream(str) {
-  var position = 0
+  let position = 0
 
   function read(length) {
-    var result = str.substr(position, length)
+    const result = str.substr(position, length)
     position += length
     return result
   }
 
   /* read a big-endian 32-bit integer */
   function readInt32() {
-    var result = (
+    const result = (
       (str.charCodeAt(position) << 24)
       + (str.charCodeAt(position + 1) << 16)
       + (str.charCodeAt(position + 2) << 8)
@@ -30,7 +30,7 @@ function Stream(str) {
 
   /* read an 8-bit integer */
   function readInt8(signed) {
-    var result = str.charCodeAt(position)
+    let result = str.charCodeAt(position)
     if (signed && result > 127) result -= 256
     position += 1
     return result
@@ -45,9 +45,9 @@ function Stream(str) {
     with top bit set to signify that another byte follows)
   */
   function readVarInt() {
-    var result = 0
+    let result = 0
     while (true) {
-      var b = readInt8()
+      const b = readInt8()
       if (b & 0x80) {
         result += (b & 0x7f)
         result <<= 7

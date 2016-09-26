@@ -4,8 +4,8 @@ class to parse the .mid file format
 */
 function MidiFile(data) {
   function readChunk(stream) {
-    var id = stream.read(4)
-    var length = stream.readInt32()
+    const id = stream.read(4)
+    const length = stream.readInt32()
     return {
       "id": id,
       "length": length,
@@ -13,19 +13,19 @@ function MidiFile(data) {
     }
   }
 
-  var lastEventTypeByte
+  let lastEventTypeByte
 
   function readEvent(stream) {
-    var event = {}
+    const event = {}
     event.deltaTime = stream.readVarInt()
-    var eventTypeByte = stream.readInt8()
+    let eventTypeByte = stream.readInt8()
     if ((eventTypeByte & 0xf0) == 0xf0) {
       /* system / meta event */
       if (eventTypeByte == 0xff) {
         /* meta event */
         event.type = "meta"
-        var subtypeByte = stream.readInt8()
-        var length = stream.readVarInt()
+        const subtypeByte = stream.readInt8()
+        const length = stream.readVarInt()
         switch(subtypeByte) {
           case 0x00:
             event.subtype = "sequenceNumber"
@@ -81,7 +81,7 @@ function MidiFile(data) {
           case 0x54:
             event.subtype = "smpteOffset"
             if (length != 5) throw "Expected length for smpteOffset event is 5, got " + length
-            var hourByte = stream.readInt8()
+            const hourByte = stream.readInt8()
             event.frameRate = {
               0x00: 24, 0x20: 25, 0x40: 29, 0x60: 30
             }[hourByte & 0x60]
@@ -119,12 +119,12 @@ function MidiFile(data) {
         return event
       } else if (eventTypeByte == 0xf0) {
         event.type = "sysEx"
-        var length = stream.readVarInt()
+        const length = stream.readVarInt()
         event.data = stream.read(length)
         return event
       } else if (eventTypeByte == 0xf7) {
         event.type = "dividedSysEx"
-        var length = stream.readVarInt()
+        const length = stream.readVarInt()
         event.data = stream.read(length)
         return event
       } else {
@@ -132,7 +132,7 @@ function MidiFile(data) {
       }
     } else {
       /* channel event */
-      var param1
+      let param1
       if ((eventTypeByte & 0x80) == 0) {
         /* running status - reuse lastEventTypeByte as the event type.
           eventTypeByte is actually the first parameter
@@ -143,7 +143,7 @@ function MidiFile(data) {
         param1 = stream.readInt8()
         lastEventTypeByte = eventTypeByte
       }
-      var eventType = eventTypeByte >> 4
+      const eventType = eventTypeByte >> 4
       event.channel = eventTypeByte & 0x0f
       event.type = "channel"
       switch (eventType) {
@@ -195,15 +195,16 @@ function MidiFile(data) {
     }
   }
 
-  stream = Stream(data)
-  var headerChunk = readChunk(stream)
+  const stream = Stream(data)
+  const headerChunk = readChunk(stream)
   if (headerChunk.id != "MThd" || headerChunk.length != 6) {
     throw "Bad .mid file - header not found"
   }
-  var headerStream = Stream(headerChunk.data)
-  var formatType = headerStream.readInt16()
-  var trackCount = headerStream.readInt16()
-  var timeDivision = headerStream.readInt16()
+  const headerStream = Stream(headerChunk.data)
+  const formatType = headerStream.readInt16()
+  const trackCount = headerStream.readInt16()
+  const timeDivision = headerStream.readInt16()
+  let ticksPerBeat
 
   if (timeDivision & 0x8000) {
     throw "Expressing time division in SMTPE frames is not supported yet"
@@ -211,21 +212,21 @@ function MidiFile(data) {
     ticksPerBeat = timeDivision
   }
 
-  var header = {
+  const header = {
     "formatType": formatType,
     "trackCount": trackCount,
     "ticksPerBeat": ticksPerBeat
   }
-  var tracks = []
-  for (var i = 0; i < header.trackCount; i++) {
+  const tracks = []
+  for (let i = 0; i < header.trackCount; i++) {
     tracks[i] = []
-    var trackChunk = readChunk(stream)
+    const trackChunk = readChunk(stream)
     if (trackChunk.id != "MTrk") {
       throw "Unexpected chunk - expected MTrk, got "+ trackChunk.id
     }
-    var trackStream = Stream(trackChunk.data)
+    const trackStream = Stream(trackChunk.data)
     while (!trackStream.eof()) {
-      var event = readEvent(trackStream)
+      let event = readEvent(trackStream)
       tracks[i].push(event)
       //console.log(event)
     }

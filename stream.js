@@ -1,5 +1,5 @@
 /* Wrapper for accessing strings through sequential reads */
-function Stream(str) {
+export default function Stream(str) {
   let position = 0
 
   function read(length) {

@@ -1,8 +1,10 @@
+import Stream from "./stream"
+
 /*
 class to parse the .mid file format
 (depends on stream.js)
 */
-function MidiFile(data) {
+export default function MidiFile(data) {
   function readChunk(stream) {
     const id = stream.read(4)
     const length = stream.readInt32()

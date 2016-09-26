@@ -46,7 +46,7 @@ export default function Stream(str) {
   */
   function readVarInt() {
     let result = 0
-    while (true) {
+    for (;;) {
       const b = readInt8()
       if (b & 0x80) {
         result += (b & 0x7f)

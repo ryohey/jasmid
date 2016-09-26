@@ -9,8 +9,8 @@ export default function MidiFile(data) {
     const id = stream.read(4)
     const length = stream.readInt32()
     return {
-      "id": id,
-      "length": length,
+      id,
+      length,
       "data": stream.read(length)
     }
   }
@@ -31,80 +31,80 @@ export default function MidiFile(data) {
           case 0x00:
             if (length != 2) throw "Expected length for sequenceNumber event is 2, got " + length
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "sequenceNumber",
               number: stream.readInt16()
             }
           case 0x01:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "text",
               text: stream.read(length)
             }
           case 0x02:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "copyrightNotice",
               text: stream.read(length)
             }
           case 0x03:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "trackName",
               text: stream.read(length)
             }
           case 0x04:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "instrumentName",
               text: stream.read(length)
             }
           case 0x05:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "lyrics",
               text: stream.read(length)
             }
           case 0x06:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "marker",
               text: stream.read(length)
             }
           case 0x07:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "cuePoint",
               text: stream.read(length)
             }
           case 0x20:
             if (length != 1) throw "Expected length for midiChannelPrefix event is 1, got " + length
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "midiChannelPrefix",
               channel: stream.readInt8()
             }
           case 0x2f:
             if (length != 0) throw "Expected length for endOfTrack event is 0, got " + length
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "endOfTrack"
             }
           case 0x51:
             if (length != 3) throw "Expected length for setTempo event is 3, got " + length
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "setTempo",
               microsecondsPerBeat: (
                 (stream.readInt8() << 16)
@@ -116,8 +116,8 @@ export default function MidiFile(data) {
             if (length != 5) throw "Expected length for smpteOffset event is 5, got " + length
             const hourByte = stream.readInt8()
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "smpteOffset",
               frameRate: {0x00: 24, 0x20: 25, 0x40: 29, 0x60: 30}[hourByte & 0x60],
               hour: hourByte & 0x1f,
@@ -130,8 +130,8 @@ export default function MidiFile(data) {
           case 0x58:
             if (length != 4) throw "Expected length for timeSignature event is 4, got " + length
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "timeSignature",
               numerator: stream.readInt8(),
               denominator: Math.pow(2, stream.readInt8()),
@@ -141,23 +141,23 @@ export default function MidiFile(data) {
           case 0x59:
             if (length != 2) throw "Expected length for keySignature event is 2, got " + length
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "keySignature",
               key: stream.readInt8(true),
               scale: stream.readInt8()
             }
           case 0x7f:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "sequencerSpecific",
               data: stream.read(length)
             }
           default:
             return {
-              deltaTime: deltaTime,
-              type: type,
+              deltaTime,
+              type,
               subtype: "unknown",
               data: stream.read(length)
             }
@@ -165,14 +165,14 @@ export default function MidiFile(data) {
       } else if (eventTypeByte == 0xf0) {
         const length = stream.readVarInt()
         return {
-          deltaTime: deltaTime,
+          deltaTime,
           type: "sysEx",
           data: stream.read(length)
         }
       } else if (eventTypeByte == 0xf7) {
         const length = stream.readVarInt()
         return {
-          deltaTime: deltaTime,
+          deltaTime,
           type: "dividedSysEx",
           data: stream.read(length)
         }
@@ -198,9 +198,9 @@ export default function MidiFile(data) {
       switch (eventType) {
         case 0x08:
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: "noteOff",
             noteNumber: param1,
             velocity: stream.readInt8()
@@ -208,9 +208,9 @@ export default function MidiFile(data) {
         case 0x09: {
           const velocity = stream.readInt8()
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: velocity == 0 ? "noteOff" : "noteOn",
             noteNumber: param1,
             velocity: velocity
@@ -218,51 +218,51 @@ export default function MidiFile(data) {
         }
         case 0x0a:
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: "noteAftertouch",
             noteNumber: param1,
             amount: stream.readInt8()
           }
         case 0x0b:
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: "controller",
             controllerType: param1,
             value: stream.readInt8()
           }
         case 0x0c:
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: "programChange",
             value: param1
           }
         case 0x0d:
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: "channelAftertouch",
             amount: param1
           }
         case 0x0e:
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: "pitchBend",
             value: param1 + (stream.readInt8() << 7)
           }
         default:
           return {
-            deltaTime: deltaTime,
-            type: type,
-            channel: channel,
+            deltaTime,
+            type,
+            channel,
             subtype: "unknown",
             value: stream.readInt8()
           }

@@ -2,6 +2,13 @@
 export default function Stream(str) {
   let position = 0
 
+  function readCharCode() {
+    const result = str.charCodeAt(position)
+    position++
+    if (isNaN(result)) throw "invalid data"
+    return result
+  }
+
   function read(length) {
     const result = str.substr(position, length)
     position += length
@@ -10,29 +17,26 @@ export default function Stream(str) {
 
   /* read a big-endian 32-bit integer */
   function readInt32() {
-    const result = (
-      (str.charCodeAt(position) << 24)
-      + (str.charCodeAt(position + 1) << 16)
-      + (str.charCodeAt(position + 2) << 8)
-      + str.charCodeAt(position + 3))
-    position += 4
+    const result =
+      (readCharCode() << 24)
+      + (readCharCode() << 16)
+      + (readCharCode() << 8)
+      + readCharCode()
     return result
   }
 
   /* read a big-endian 16-bit integer */
   function readInt16() {
-    var result = (
-      (str.charCodeAt(position) << 8)
-      + str.charCodeAt(position + 1))
-    position += 2
+    var result =
+      (readCharCode() << 8)
+      + readCharCode()
     return result
   }
 
   /* read an 8-bit integer */
-  function readInt8(signed) {
-    let result = str.charCodeAt(position)
+  function readInt8(signed = false) {
+    let result = readCharCode()
     if (signed && result > 127) result -= 256
-    position += 1
     return result
   }
 

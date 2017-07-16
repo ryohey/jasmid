@@ -1,16 +1,19 @@
 /* Wrapper for accessing strings through sequential reads */
-export default function Stream(str) {
+export default function Stream(buf) {
   let position = 0
 
-  function readCharCode() {
-    const result = str.charCodeAt(position)
+  function readByte() {
+    const result = buf[position]
     position++
-    if (isNaN(result)) throw "invalid data"
     return result
   }
 
+  function readStr(length) {
+    return read(length).toString()
+  }
+
   function read(length) {
-    const result = str.substr(position, length)
+    const result = buf.slice(position, position + length)
     position += length
     return result
   }
@@ -18,30 +21,30 @@ export default function Stream(str) {
   /* read a big-endian 32-bit integer */
   function readInt32() {
     const result =
-      (readCharCode() << 24)
-      + (readCharCode() << 16)
-      + (readCharCode() << 8)
-      + readCharCode()
+      (readByte() << 24)
+      + (readByte() << 16)
+      + (readByte() << 8)
+      + readByte()
     return result
   }
 
   /* read a big-endian 16-bit integer */
   function readInt16() {
     var result =
-      (readCharCode() << 8)
-      + readCharCode()
+      (readByte() << 8)
+      + readByte()
     return result
   }
 
   /* read an 8-bit integer */
   function readInt8(signed = false) {
-    let result = readCharCode()
+    let result = readByte()
     if (signed && result > 127) result -= 256
     return result
   }
 
   function eof() {
-    return position >= str.length
+    return position >= buf.length
   }
 
   /* read a MIDI-style variable-length integer
@@ -68,6 +71,7 @@ export default function Stream(str) {
     readInt32,
     readInt16,
     readInt8,
-    readVarInt
+    readVarInt,
+    readStr
   }
 }

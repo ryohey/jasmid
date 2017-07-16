@@ -41,49 +41,49 @@ export default function MidiFile(data) {
               deltaTime,
               type,
               subtype: "text",
-              text: stream.read(length)
+              text: stream.readStr(length)
             }
           case 0x02:
             return {
               deltaTime,
               type,
               subtype: "copyrightNotice",
-              text: stream.read(length)
+              text: stream.readStr(length)
             }
           case 0x03:
             return {
               deltaTime,
               type,
               subtype: "trackName",
-              text: stream.read(length)
+              text: stream.readStr(length)
             }
           case 0x04:
             return {
               deltaTime,
               type,
               subtype: "instrumentName",
-              text: stream.read(length)
+              text: stream.readStr(length)
             }
           case 0x05:
             return {
               deltaTime,
               type,
               subtype: "lyrics",
-              text: stream.read(length)
+              text: stream.readStr(length)
             }
           case 0x06:
             return {
               deltaTime,
               type,
               subtype: "marker",
-              text: stream.read(length)
+              text: stream.readStr(length)
             }
           case 0x07:
             return {
               deltaTime,
               type,
               subtype: "cuePoint",
-              text: stream.read(length)
+              text: stream.readStr(length)
             }
           case 0x20:
             if (length != 1) throw "Expected length for midiChannelPrefix event is 1, got " + length
@@ -92,6 +92,14 @@ export default function MidiFile(data) {
               type,
               subtype: "midiChannelPrefix",
               channel: stream.readInt8()
+            }
+          case 0x21:
+            if (length != 1) throw "Expected length for midiChannelPrefix event is 1, got " + length
+            return {
+              deltaTime,
+              type,
+              subtype: "portPrefix",
+              port: stream.readInt8()
             }
           case 0x2f:
             if (length != 0) throw "Expected length for endOfTrack event is 0, got " + length

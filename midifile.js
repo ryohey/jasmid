@@ -20,16 +20,16 @@ export default function MidiFile(data) {
   function readEvent(stream) {
     const deltaTime = stream.readVarInt()
     let eventTypeByte = stream.readInt8()
-    if ((eventTypeByte & 0xf0) == 0xf0) {
+    if ((eventTypeByte & 0xf0) === 0xf0) {
       /* system / meta event */
-      if (eventTypeByte == 0xff) {
+      if (eventTypeByte === 0xff) {
         /* meta event */
         const type = "meta"
         const subtypeByte = stream.readInt8()
         const length = stream.readVarInt()
         switch(subtypeByte) {
           case 0x00:
-            if (length != 2) throw "Expected length for sequenceNumber event is 2, got " + length
+            if (length !== 2) throw new Error("Expected length for sequenceNumber event is 2, got " + length)
             return {
               deltaTime,
               type,
@@ -86,7 +86,7 @@ export default function MidiFile(data) {
               text: stream.readStr(length)
             }
           case 0x20:
-            if (length != 1) throw "Expected length for midiChannelPrefix event is 1, got " + length
+            if (length !== 1) throw new Error("Expected length for midiChannelPrefix event is 1, got " + length)
             return {
               deltaTime,
               type,
@@ -94,7 +94,7 @@ export default function MidiFile(data) {
               channel: stream.readInt8()
             }
           case 0x21:
-            if (length != 1) throw "Expected length for midiChannelPrefix event is 1, got " + length
+            if (length !== 1) throw new Error("Expected length for midiChannelPrefix event is 1, got " + length)
             return {
               deltaTime,
               type,
@@ -102,14 +102,14 @@ export default function MidiFile(data) {
               port: stream.readInt8()
             }
           case 0x2f:
-            if (length != 0) throw "Expected length for endOfTrack event is 0, got " + length
+            if (length !== 0) throw new Error("Expected length for endOfTrack event is 0, got " + length)
             return {
               deltaTime,
               type,
               subtype: "endOfTrack"
             }
           case 0x51:
-            if (length != 3) throw "Expected length for setTempo event is 3, got " + length
+            if (length !== 3) throw new Error("Expected length for setTempo event is 3, got " + length)
             return {
               deltaTime,
               type,
@@ -121,7 +121,7 @@ export default function MidiFile(data) {
               )
             }
           case 0x54: {
-            if (length != 5) throw "Expected length for smpteOffset event is 5, got " + length
+            if (length !== 5) throw new Error("Expected length for smpteOffset event is 5, got " + length)
             const hourByte = stream.readInt8()
             return {
               deltaTime,
@@ -136,7 +136,7 @@ export default function MidiFile(data) {
             }
           }
           case 0x58:
-            if (length != 4) throw "Expected length for timeSignature event is 4, got " + length
+            if (length !== 4) throw new Error("Expected length for timeSignature event is 4, got " + length)
             return {
               deltaTime,
               type,
@@ -147,7 +147,7 @@ export default function MidiFile(data) {
               thirtyseconds: stream.readInt8()
             }
           case 0x59:
-            if (length != 2) throw "Expected length for keySignature event is 2, got " + length
+            if (length !== 2) throw new Error("Expected length for keySignature event is 2, got " + length)
             return {
               deltaTime,
               type,
@@ -170,14 +170,14 @@ export default function MidiFile(data) {
               data: stream.read(length)
             }
         }
-      } else if (eventTypeByte == 0xf0) {
+      } else if (eventTypeByte === 0xf0) {
         const length = stream.readVarInt()
         return {
           deltaTime,
           type: "sysEx",
           data: stream.read(length)
         }
-      } else if (eventTypeByte == 0xf7) {
+      } else if (eventTypeByte === 0xf7) {
         const length = stream.readVarInt()
         return {
           deltaTime,
@@ -185,12 +185,12 @@ export default function MidiFile(data) {
           data: stream.read(length)
         }
       } else {
-        throw "Unrecognised MIDI event type byte: " + eventTypeByte
+        throw new Error("Unrecognised MIDI event type byte: " + eventTypeByte)
       }
     } else {
       /* channel event */
       let param1
-      if ((eventTypeByte & 0x80) == 0) {
+      if ((eventTypeByte & 0x80) === 0) {
         /* running status - reuse lastEventTypeByte as the event type.
           eventTypeByte is actually the first parameter
         */
@@ -219,7 +219,7 @@ export default function MidiFile(data) {
             deltaTime,
             type,
             channel,
-            subtype: velocity == 0 ? "noteOff" : "noteOn",
+            subtype: velocity === 0 ? "noteOff" : "noteOn",
             noteNumber: param1,
             velocity: velocity
           }
@@ -280,8 +280,8 @@ export default function MidiFile(data) {
 
   const stream = Stream(data)
   const headerChunk = readChunk(stream)
-  if (headerChunk.id != "MThd" || headerChunk.length != 6) {
-    throw "Bad .mid file - header not found"
+  if (headerChunk.id !== "MThd" || headerChunk.length !== 6) {
+    throw new Error("Bad .mid file - header not found")
   }
   const headerStream = Stream(headerChunk.data)
   const formatType = headerStream.readInt16()
@@ -290,7 +290,7 @@ export default function MidiFile(data) {
   let ticksPerBeat
 
   if (timeDivision & 0x8000) {
-    throw "Expressing time division in SMTPE frames is not supported yet"
+    throw new Error("Expressing time division in SMTPE frames is not supported yet")
   } else {
     ticksPerBeat = timeDivision
   }
@@ -304,8 +304,8 @@ export default function MidiFile(data) {
   for (let i = 0; i < header.trackCount; i++) {
     tracks[i] = []
     const trackChunk = readChunk(stream)
-    if (trackChunk.id != "MTrk") {
-      throw "Unexpected chunk - expected MTrk, got "+ trackChunk.id
+    if (trackChunk.id !== "MTrk") {
+      throw new Error("Unexpected chunk - expected MTrk, got "+ trackChunk.id)
     }
     const trackStream = Stream(trackChunk.data)
     while (!trackStream.eof()) {
